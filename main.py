@@ -1,6 +1,25 @@
 import requests
 from requests_html import HTML
 from requests_html import HTMLSession
+import os 
+
+
+def get_urls():
+    '''Read urls from a file ~/.hel/urls, format it and return 
+
+    Returns:
+        urls [list]: list of read urls 
+    '''
+
+    url_file = os.path.expanduser('~/.hel/urls')
+
+    f = open(url_file, "r")
+    urls = f.readlines()
+
+    for x in range(len(urls)):
+        urls[x] = urls[x].replace('\n', '')
+
+    return urls
 
 
 def get_source(url):
@@ -12,45 +31,48 @@ def get_source(url):
     Returns:
         response (object): HTTP response object from requests_html. 
     """
-
-    try:
+    try:  
         session = HTMLSession()
         response = session.get(url)
         return response
+    except: 
+        print('couldn\'t get source ({})'.format(url))
+        return 0
 
-    except requests.exceptions.RequestException() as e:
-        print(e)
 
-def get_feed(url):
-    """Read and show feed of given url
-
-    Args: 
-        url (string): URL of the RSS feed to read.
+def get_feed():
+    """Read and show feed
     """
-    
-    response = get_source(url)
+    urls = get_urls()
 
-    with response as r:
-        items = r.html.find("item", first=False)
+    for url in urls:
+        #print(url)
+        response = get_source(url)
+        if response==0:
+            continue
 
-        for item in items:        
+        with response as r:
+            items = r.html.find("item", first=False)
 
-            title = item.find('title', first=True).text
-            pubDate = item.find('pubDate', first=True).text
-            guid = item.find('guid', first=True).text
-            description = item.find('description', first=True).text
+            for item in items:        
 
-            print('Title: ' + title)
-            print('Data: ' + pubDate)
-            print('guid: ' + guid)
-            print('Description: ' + description)
-            print('===================================================')
+                title = item.find('title', first=True).text
+                pubDate = item.find('pubDate', first=True).text
+                guid = item.find('guid', first=True).text
+                description = item.find('description', first=True).text
+
+                print('Title: ' + title)
+                print('Data: ' + pubDate)
+                print('guid: ' + guid)
+                print('Description: ' + description)
+                print('===================================================')
 
 
 
 def main():
-    url = "https://nitter.net/MelonTeee/rss"
-    get_feed(url)
+    # url = "https://nitter.net/MelonTeee/rss"
+    get_feed()
+    # get_urls()
 
 
 if __name__=="__main__":
