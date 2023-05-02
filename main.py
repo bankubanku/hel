@@ -3,10 +3,11 @@ from requests_html import HTML
 from requests_html import HTMLSession
 import os 
 from bs4 import BeautifulSoup 
-
+from datetime import datetime
 
 get_source_errs = []
-
+DATE_FORMAT = '%a, %d %b %Y %H:%M:%S %Z'
+DATE_FORMAT_ALT = '%a, %d %b %Y %H:%M:%S %z'
 
 def get_urls():
     '''Read urls from a file ~/.hel/urls, format it and return 
@@ -55,24 +56,26 @@ def get_feed():
     urls = get_urls()
 
     for url in urls:
-        print(url)
         soup = get_source(url)
-        print()
         if soup==0:
-            print('1')
             continue
         
         items = soup.findAll('item')
-
+        
         for item in items:        
 
             title = item.find('title').text
             pubDate = item.find('pubDate').text
+            try:
+                pubDate = datetime.strptime(pubDate, DATE_FORMAT)
+            except:
+                pubDate = datetime.strptime(pubDate, DATE_FORMAT_ALT)
+
             guid = item.find('guid').text
             description = item.find('description').text
 
             print('Title: ' + title)
-            print('Data: ' + pubDate)
+            print(pubDate)
             print('guid: ' + guid)
             #print('Description: ' + description)
             print('===================================================')
