@@ -2,6 +2,10 @@ import requests
 from requests_html import HTML
 from requests_html import HTMLSession
 import os 
+from bs4 import BeautifulSoup 
+
+
+get_source_errs = []
 
 
 def get_urls():
@@ -18,6 +22,8 @@ def get_urls():
 
     for x in range(len(urls)):
         urls[x] = urls[x].replace('\n', '')
+        if not urls[x].startswith('http'):
+            del urls[x]
 
     return urls
 
@@ -32,11 +38,14 @@ def get_source(url):
         response (object): HTTP response object from requests_html. 
     """
     try:  
+        #r = requests.get(url)
         session = HTMLSession()
-        response = session.get(url)
-        return response
-    except: 
-        print('couldn\'t get source ({})'.format(url))
+        r = session.get(url)
+        soup = BeautifulSoup(r.text, features='xml')
+        return soup
+
+    except Exception as e: 
+        get_source_errs.append('couldn\'t get source ({})\nError: {}\n'.format(url, e))
         return 0
 
 
@@ -46,33 +55,34 @@ def get_feed():
     urls = get_urls()
 
     for url in urls:
-        #print(url)
-        response = get_source(url)
-        if response==0:
+        print(url)
+        soup = get_source(url)
+        print()
+        if soup==0:
+            print('1')
             continue
+        
+        items = soup.findAll('item')
 
-        with response as r:
-            items = r.html.find("item", first=False)
+        for item in items:        
 
-            for item in items:        
+            title = item.find('title').text
+            pubDate = item.find('pubDate').text
+            guid = item.find('guid').text
+            description = item.find('description').text
 
-                title = item.find('title', first=True).text
-                pubDate = item.find('pubDate', first=True).text
-                guid = item.find('guid', first=True).text
-                description = item.find('description', first=True).text
-
-                print('Title: ' + title)
-                print('Data: ' + pubDate)
-                print('guid: ' + guid)
-                print('Description: ' + description)
-                print('===================================================')
+            print('Title: ' + title)
+            print('Data: ' + pubDate)
+            print('guid: ' + guid)
+            #print('Description: ' + description)
+            print('===================================================')
 
 
 
 def main():
-    # url = "https://nitter.net/MelonTeee/rss"
     get_feed()
-    # get_urls()
+    for e in get_source_errs:
+        print(e)
 
 
 if __name__=="__main__":
