@@ -53,37 +53,66 @@ def get_source(url):
 def get_feed():
     """Read and show feed
     """
+
     urls = get_urls()
+    posts = []
 
     for url in urls:
+
         soup = get_source(url)
+
         if soup==0:
             continue
         
+        account = soup.find('channel').find('title').text
         items = soup.findAll('item')
         
+
         for item in items:        
 
-            title = item.find('title').text
-            pubDate = item.find('pubDate').text
-            try:
-                pubDate = datetime.strptime(pubDate, DATE_FORMAT)
-            except:
-                pubDate = datetime.strptime(pubDate, DATE_FORMAT_ALT)
+            post = {
+                'account': account,
+                'title': None,
+                'link': None,
+                'pubDate': None, 
+                'description': None,
+            }       
+            
+            post['title'] = item.find('title')
+            post['link'] = item.find('link')
+            post['pubDate'] = item.find('pubDate')
+            post['description'] = item.find('description')
 
-            guid = item.find('guid').text
-            description = item.find('description').text
+            for x in post:
+                if x == 'account':
+                    continue
+                if post[x] is not None:
+                    post[x] = post[x].text
+                elif x == 'pubDate':
+                    post[x] = datetime.now()
 
-            print('Title: ' + title)
-            print(pubDate)
-            print('guid: ' + guid)
-            #print('Description: ' + description)
-            print('===================================================')
+                if x == 'pubDate':        
+                    try:
+                        post[x] = datetime.strptime(post[x], DATE_FORMAT)
+                    except:
+                        post[x] = datetime.now()#datetime.strptime(post[x], DATE_FORMAT_ALT)
+                
 
+            posts.append(post)
+            
+            # print('Creator: ' + creator)
+            # print('Title: ' + title)
+            # print(pubDate)
+            # print('link: ' + link)
+            # #print('Description: ' + description)
+            # print('===================================================')
+    return posts
 
 
 def main():
-    get_feed()
+    posts = get_feed()
+    posts = sorted(posts, key=lambda x: x['pubDate'], reverse=True)
+    
     for e in get_source_errs:
         print(e)
 
