@@ -13,13 +13,12 @@ JSON_POSTS = os.path.expanduser('~/.hel/posts.json')
 
 
 def get_posts():
-    if os.path.exists(JSON_POSTS):
+    try:
         with open(JSON_POSTS, 'rb') as f:
-            # print(f.read())
             posts = json.load(f)
-
-        return posts 
-    else:
+            return posts
+    except Exception as e:
+        print(e)
         return 1
 
 
@@ -66,12 +65,18 @@ def get_source(url):
         return 0
 
 
-def get_feed(last_pubDate):
+def get_feed(posts):
     """Read and show feed
     """
 
     urls = get_urls()
-    posts = []
+
+    if posts == 1:
+        posts = []
+        last_pubDate = 1
+    else:
+        print(posts[0])
+        last_pubDate = posts[0]['pubDate']
 
     for url in urls:
 
@@ -115,7 +120,6 @@ def get_feed(last_pubDate):
                 if datetime.strptime(last_pubDate, DATE_FORMAT) >= datetime.strptime(post['pubDate'], DATE_FORMAT):
                     break
 
-
             posts.append(post)
 
     return posts
@@ -125,13 +129,9 @@ def main():
     posts = get_posts()
     posts = get_feed(posts)
     posts = sorted(posts, key=lambda x: datetime.strptime(
-        x['pubDate'], DATE_FORMAT))
-    # for x in posts:
-    #     print(type(x['title']))
-    #     print(type(x['link']))
-    #     print(type(x['pubDate']))
-    #     print(type(x['description']))
-    with open(JSON_POSTS, 'a') as f:
+        x['pubDate'], DATE_FORMAT), reverse=True)
+
+    with open(JSON_POSTS, 'w') as f:
         json.dump(posts, f, indent=4)
 
     for e in get_source_errs:
