@@ -4,22 +4,11 @@ from requests_html import HTMLSession
 import os
 from bs4 import BeautifulSoup
 from datetime import datetime
-import json
+import posts 
 
 get_source_errs = []
 DATE_FORMAT = '%a, %d %b %Y %H:%M:%S %Z'
 DATE_FORMAT_ALT = '%a, %d %b %Y %H:%M:%S %z'
-JSON_POSTS = os.path.expanduser('~/.hel/posts.json')
-
-
-def get_posts():
-    try:
-        with open(JSON_POSTS, 'rb') as f:
-            posts = json.load(f)
-            return posts
-    except Exception as e:
-        print(e)
-        return 1
 
 
 def get_urls():
@@ -126,13 +115,12 @@ def get_feed(posts):
 
 
 def main():
-    posts = get_posts()
-    posts = get_feed(posts)
-    posts = sorted(posts, key=lambda x: datetime.strptime(
+    posts_list = posts.get_list()
+    posts_list = get_feed(posts_list)
+    posts_list = sorted(posts_list, key=lambda x: datetime.strptime(
         x['pubDate'], DATE_FORMAT), reverse=True)
 
-    with open(JSON_POSTS, 'w') as f:
-        json.dump(posts, f, indent=4)
+    posts.save_list(posts_list)
 
     for e in get_source_errs:
         print(e)
