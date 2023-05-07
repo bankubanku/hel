@@ -60,8 +60,7 @@ def get_feed(posts):
 
     urls = get_urls()
 
-    if posts == 1:
-        posts = []
+    if posts == []:
         last_pubDate = 1
     else:
         print(posts[0])
@@ -116,6 +115,7 @@ def get_feed(posts):
 
 def main():
     posts_list = posts.get_list()
+    print(posts_list)
     posts_list = get_feed(posts_list)
     posts_list = sorted(posts_list, key=lambda x: datetime.strptime(
         x['pubDate'], DATE_FORMAT), reverse=True)
