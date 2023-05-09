@@ -4,12 +4,54 @@ from requests_html import HTMLSession
 import os
 from bs4 import BeautifulSoup
 from datetime import datetime
-import posts 
+import posts
 
 get_source_errs = []
 DATE_FORMAT = '%a, %d %b %Y %H:%M:%S %Z'
 DATE_FORMAT_ALT = '%a, %d %b %Y %H:%M:%S %z'
 
+
+def get_atom_data(entry, post_data):
+    post_data['title'] = entry.find('title')
+    post_data['link'] = entry.find('link', href=True)
+    print(post_data['link'])
+    post_data['pubData'] = entry.find('published')
+    post_data['description'] = entry.find('media:description')
+
+
+
+def get_rss_data(item, post_data, last_pubDate):
+    '''write proper data to its place for each item'''
+    
+
+    post_data['title'] = item.find('title')
+    post_data['link'] = item.find('link')
+    post_data['pubDate'] = item.find('pubDate')
+    post_data['description'] = item.find('description')
+    # print(post_data['description'])
+
+    for x in post_data:
+        '''check if x isn't None and if it isn't make a string out of it'''
+        if x == 'account':
+            continue
+        if post_data[x] is not None:
+            post_data[x] = post_data[x].text
+
+        '''check if pubDate is in the right format and if it isn't change it to this format'''
+        if x == 'pubDate':
+            try:
+                datetime.strptime(post_data[x], DATE_FORMAT)
+            except:
+                post_data[x] = datetime.strptime(post_data[x], DATE_FORMAT_ALT)
+                post_data[x] = post_data[x].strftime(DATE_FORMAT)
+
+            '''if pubDate of this post is older or the same as lase saved post then don't add it again'''
+            if last_pubDate != 1:
+                if datetime.strptime(last_pubDate, DATE_FORMAT) >= datetime.strptime(post_data['pubDate'], DATE_FORMAT):
+                    break
+
+    return post_data
+    
 
 def get_urls():
     '''Read urls from a file ~/.hel/urls, format it and return 
@@ -29,7 +71,7 @@ def get_urls():
             '''remove new line escape sign to avoid errors'''
             x = x.replace('\n', '')
             urls.append(x)
-    
+
     return urls
 
 
@@ -71,9 +113,9 @@ def get_feed(posts_list):
     if posts_list == []:
         last_pubDate = 1
     else:
-        print(posts_list[0])
         last_pubDate = posts_list[0]['pubDate']
 
+    i = 0
     '''go through each source and get needed data'''
     for url in urls:
 
@@ -84,46 +126,31 @@ def get_feed(posts_list):
         if soup == 0:
             continue
 
-        account = soup.find('channel').find('title').text
         items = soup.findAll('item')
+        entries = soup.findAll('entry')
+        account = soup.find('title').text
 
-        '''write proper data to its place for each item'''
-        for item in items:
+        post_data = {
+            'account': account,
+            'title': None,
+            'link': None,
+            'pubDate': None,
+            'description': None,
+        }
+        i += 1
+        
+        
+        if len(items) > len(entries):
+            for item in items:
+                post_data = get_rss_data(item, post_data, last_pubDate)
+                posts_list.append(post_data)
 
-            post = {
-                'account': account,
-                'title': None,
-                'link': None,
-                'pubDate': None,
-                'description': None,
-            }
-
-            post['title'] = item.find('title')
-            post['link'] = item.find('link')
-            post['pubDate'] = item.find('pubDate')
-            post['description'] = item.find('description')
-
-            for x in post:
-                '''check if x isn't None and if it isn't make a string out of it'''
-                if x == 'account':
-                    continue
-                if post[x] is not None:
-                    post[x] = post[x].text
-
-                '''check if pubDate is in the right format and if it isn't change it to this format'''
-                if x == 'pubDate':
-                    try:
-                        datetime.strptime(post[x], DATE_FORMAT)
-                    except:
-                        post[x] = datetime.strptime(post[x], DATE_FORMAT_ALT)
-                        post[x] = post[x].strftime(DATE_FORMAT)
-
-            '''if pubDate of this post is older or the same as lase saved post then don't add it again'''
-            if last_pubDate != 1:
-                if datetime.strptime(last_pubDate, DATE_FORMAT) >= datetime.strptime(post['pubDate'], DATE_FORMAT):
-                    break
-                    
-            posts_list.append(post)
+        # elif len(items) < len(entries):
+        #     for entry in entries:
+        #         post_data = get_atom_data(entry, post_data)
+        #         #posts_list.append(post_data)
+        # else:
+        #     print('there is no feed for {}'.format(url))
 
     return posts_list
 
