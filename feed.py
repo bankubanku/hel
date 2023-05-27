@@ -31,27 +31,6 @@ def get_urls():
     return urls
 
 
-def get_soup(url):
-    """scape data from given address and make a soup  
-
-    args:
-        url (string): url of the page to scrape.
-
-    returns:
-        soup {bs4.object}: soup of scraped data or 0 if an error occured
-    """
-
-    try:
-        session = HTMLSession()
-        r = session.get(url)
-        soup = BeautifulSoup(r.text, features='xml')
-        return soup
-
-    except Exception as e:
-        get_source_errs.append(
-            'couldn\'t get source ({})\nError: {}\n'.format(url, e))
-        return 0
-
 
 def update(posts_list):
     '''get feed from the Internet based on given urls and update the list of posts
@@ -86,61 +65,3 @@ def update(posts_list):
 
     return posts_list, get_source_errs
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    '''skip parsing data if there is no soup to parse'''
-        # if soup == 0:
-        #     continue
-
-        # items = soup.findAll('item')
-        # entries = soup.findAll('entry')
-        # account = soup.find('title').text
-
-        #i += 1
-
-        # if len(items) > len(entries):
-        #     for item in items:
-        #         post_data = {
-        #             'account': account,
-        #             'title': None,
-        #             'link': None,
-        #             'pubDate': None,
-        #             'description': None,
-        #         }
-        #         post_data = get_rss_data(item, post_data, last_pubDate)
-        #         # if post_data == 1:
-        #         #     continue
-        #         # else:
-        #         posts_list.append(post_data)
-
-        # elif len(items) < len(entries):
-        #     for entry in entries:
-        #         post_data = {
-        #             'account': account,
-        #             'title': None,
-        #             'link': None,
-        #             'pubDate': None,
-        #             'description': None,
-        #         }
-        #         post_data = get_atom_data(entry, post_data, last_pubDate)
-        #         # if post_data == 1:
-        #         #     continue
-        #         #else:
-        #         posts_list.append(post_data)
-        # else:
-        #     print('there is no feed for {}'.format(url))
