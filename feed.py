@@ -3,7 +3,8 @@
 from requests_html import HTMLSession
 from bs4 import BeautifulSoup
 from os.path import exists, expanduser 
-from data_handling import get_atom_data, get_rss_data
+from data_handling import get_data
+import feedparser
 
 get_source_errs = []
 
@@ -68,55 +69,78 @@ def update(posts_list):
     if posts_list == []:
         last_pubDate = 1
     else:
-        last_pubDate = posts_list[0]['pubDate']
+        last_pubDate = posts_list[0]['published']
 
-    #i = 0
     '''go through each source and get needed data'''
     for url in urls:
+        try:
+            parsed_feed = feedparser.parse(url)
+        except Exception as e:
+            get_source_errs.append(e)
+        post_to_append = get_data(parsed_feed, last_pubDate)
+        print(url)
+        print(len(post_to_append))
+        for x in post_to_append:
+            posts_list.append(x)
+        post_to_append = []
 
-        '''get soup (bs4) for given source'''
-        soup = get_soup(url)
+    return posts_list, get_source_errs
 
-        '''skip parsing data if there is no soup to parse'''
-        if soup == 0:
-            continue
 
-        items = soup.findAll('item')
-        entries = soup.findAll('entry')
-        account = soup.find('title').text
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    '''skip parsing data if there is no soup to parse'''
+        # if soup == 0:
+        #     continue
+
+        # items = soup.findAll('item')
+        # entries = soup.findAll('entry')
+        # account = soup.find('title').text
 
         #i += 1
 
-        if len(items) > len(entries):
-            for item in items:
-                post_data = {
-                    'account': account,
-                    'title': None,
-                    'link': None,
-                    'pubDate': None,
-                    'description': None,
-                }
-                post_data = get_rss_data(item, post_data, last_pubDate)
-                # if post_data == 1:
-                #     continue
-                # else:
-                posts_list.append(post_data)
+        # if len(items) > len(entries):
+        #     for item in items:
+        #         post_data = {
+        #             'account': account,
+        #             'title': None,
+        #             'link': None,
+        #             'pubDate': None,
+        #             'description': None,
+        #         }
+        #         post_data = get_rss_data(item, post_data, last_pubDate)
+        #         # if post_data == 1:
+        #         #     continue
+        #         # else:
+        #         posts_list.append(post_data)
 
-        elif len(items) < len(entries):
-            for entry in entries:
-                post_data = {
-                    'account': account,
-                    'title': None,
-                    'link': None,
-                    'pubDate': None,
-                    'description': None,
-                }
-                post_data = get_atom_data(entry, post_data, last_pubDate)
-                # if post_data == 1:
-                #     continue
-                #else:
-                posts_list.append(post_data)
-        else:
-            print('there is no feed for {}'.format(url))
-
-    return posts_list, get_source_errs
+        # elif len(items) < len(entries):
+        #     for entry in entries:
+        #         post_data = {
+        #             'account': account,
+        #             'title': None,
+        #             'link': None,
+        #             'pubDate': None,
+        #             'description': None,
+        #         }
+        #         post_data = get_atom_data(entry, post_data, last_pubDate)
+        #         # if post_data == 1:
+        #         #     continue
+        #         #else:
+        #         posts_list.append(post_data)
+        # else:
+        #     print('there is no feed for {}'.format(url))
