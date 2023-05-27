@@ -8,12 +8,6 @@ import json_handling
 from atom_date_format import get_date_object, get_date_string
 
 
-RSS_DATE_FORMAT = '%a, %d %b %Y %H:%M:%S %Z'
-END_DATE_FORMAT = '%a, %d %b %Y %H:%M:%S'
-RSS_DATE_FORMAT_ALT = '%a, %d %b %Y %H:%M:%S %z'
-ATOM_DATE_FORMAT = '%Y-%m-%dT%H-%M-%S%z'
-
-
 def main():
     '''Get already saved posts'''
     posts_list = json_handling.get_list()
