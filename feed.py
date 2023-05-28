@@ -44,11 +44,11 @@ def update(posts_list):
 
     urls = get_urls()
 
-    '''check what was publication date of the last saved post and set 1 if there was no last saved post'''
+    '''check what was publication date of the last saved post and set low number if there was no last saved post'''
     if posts_list == []:
-        last_pubDate = 1
+        last_published = 2137 # if u know, u know :3 
     else:
-        last_pubDate = posts_list[0]['published']
+        last_published = posts_list[0]['published']
 
     '''go through each source and get needed data'''
     for url in urls:
@@ -56,7 +56,7 @@ def update(posts_list):
             parsed_feed = feedparser.parse(url)
         except Exception as e:
             get_source_errs.append(e)
-        post_to_append = get_data(parsed_feed, last_pubDate)
+        post_to_append = get_data(parsed_feed, last_published)
 
         for x in post_to_append:
             posts_list.append(x)

@@ -2,17 +2,16 @@ import datetime
 from time import gmtime, mktime
 
 
-def is_old(new_time, last_time):
-    
-    if last_time == 1:
-        return False
-    elif new_time <= last_time:
-        return True
-    else:
-        return False
+def get_data(parsed_entries, last_published):
+    '''parses and adds scraped data to list of new posts
 
+    args:
+        parsed_entries (feedparser.util.FeedParserDict): data parsed by feedparser
+        last_published (float): time of last saved post in unix time format 
 
-def get_data(parsed_entries, last_pubDate):
+    return:
+        new_posts (list): list of new posts which weren't saved 
+    '''
 
     new_posts = []
 
@@ -30,7 +29,7 @@ def get_data(parsed_entries, last_pubDate):
         if post_data['description'] == 'no data': 
             post_data['description'] = parsed_entries.entries[x].get('summary',  'no data')
         
-        if is_old(post_data['published'], last_pubDate):
+        if post_data['published'] <= last_published:
             continue
 
         new_posts.append(post_data)
