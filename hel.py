@@ -5,7 +5,6 @@ import json
 '''my modules'''
 import feed
 import json_handling
-from atom_date_format import get_date_object, get_date_string
 
 
 def main():
@@ -14,6 +13,8 @@ def main():
 
     '''Update list of posts by the feed from the Internet'''
     posts_list, get_source_errs = feed.update(posts_list)
+
+    posts_list = sorted(posts_list, key=lambda x: x['published'], reverse=True)
     
     '''Save updated list'''
     json_handling.save_list(posts_list)

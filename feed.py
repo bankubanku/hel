@@ -57,8 +57,7 @@ def update(posts_list):
         except Exception as e:
             get_source_errs.append(e)
         post_to_append = get_data(parsed_feed, last_pubDate)
-        print(url)
-        print(len(post_to_append))
+
         for x in post_to_append:
             posts_list.append(x)
         post_to_append = []
