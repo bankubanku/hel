@@ -1,5 +1,5 @@
 # hel
-This program gets basic information about RSS/Atom feed and converts it into JSON in chronological order. It can be used as a foundation for various interfaces.       
+This program gets basic information from RSS/Atom feed and converts it into JSON in chronological order. It can be used as a foundation for various interfaces.       
 
 ## installation 
 Clone this repository
