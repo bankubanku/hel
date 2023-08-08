@@ -3,8 +3,8 @@ from datetime import datetime
 import json
 
 '''my modules'''
-import feed
-import json_handling
+from modules import feed, json_handling
+
 
 
 def main():

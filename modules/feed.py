@@ -1,9 +1,7 @@
-#import requests
-# from requests_html import HTML
 from requests_html import HTMLSession
 from bs4 import BeautifulSoup
 from os.path import exists, expanduser 
-from data_handling import get_data
+from modules.data_handling import get_data
 import feedparser
 
 get_source_errs = []
