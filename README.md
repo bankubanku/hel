@@ -7,7 +7,7 @@ Clone this repository
 git clone https://github.com/bankubanku/hel.git
 ```
 
-Install requirements
+Install dependencies 
 ```shell
 pip install -r requirements.txt
 ```
